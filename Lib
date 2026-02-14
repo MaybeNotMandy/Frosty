@@ -131,6 +131,26 @@ function SimpleKavo.CreateLib(title, themeName)
         ScreenGui:Destroy()
     end)
 
+    local Minimize = Instance.new("ImageButton")
+    Minimize.Name = "MinimizeButton"
+    Minimize.Parent = ScreenGui
+    Minimize.BackgroundColor3 = currentTheme.ElementColor
+    Minimize.BackgroundTransparency = 0.5
+    Minimize.Size = UDim2.new(0, 40, 0, 40)
+    Minimize.Position = UDim2.new(0.3, -45, 0.3, -50)
+    Minimize.Image = "rbxassetid://77395718743170"
+    Minimize.ImageColor3 = currentTheme.TextColor
+    local MinimizeCorner = Instance.new("UICorner")
+    MinimizeCorner.CornerRadius = UDim.new(0, 8)
+    MinimizeCorner.Parent = Minimize
+    SimpleKavo:DraggingEnabled(Minimize)
+
+    local Minimized = false
+    Minimize.MouseButton1Click:Connect(function()
+        Minimized = not Minimized
+        Tween(Main, {Size = Minimized and UDim2.new(0,0,0,0) or UDim2.new(0,500,0,350)})
+    end)
+
     SimpleKavo:DraggingEnabled(Header, Main)
 
     local TabsScroll = Instance.new("ScrollingFrame")
@@ -166,27 +186,6 @@ function SimpleKavo.CreateLib(title, themeName)
     local tabsOrder = {}
     local currentTab = nil
 
-    local Minimized = false
-
-    local function toggleMinimize()
-        Minimized = not Minimized
-        Tween(Main, {Size = Minimized and UDim2.new(0,0,0,0) or UDim2.new(0,500,0,350)})
-    end
-
-    local inputConnection
-    inputConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        if input.KeyCode == Enum.KeyCode.F1 then
-            toggleMinimize()
-        end
-    end)
-
-    ScreenGui.Destroying:Connect(function()
-        if inputConnection then
-            inputConnection:Disconnect()
-        end
-    end)
-
     local function updateTheme(newThemeName)
         local theme = Themes[newThemeName]
         if not theme then return end
@@ -196,6 +195,8 @@ function SimpleKavo.CreateLib(title, themeName)
         Header.BackgroundColor3 = theme.Header
         Title.TextColor3 = theme.TextColor
         TabsScroll.ScrollBarImageColor3 = theme.SchemeColor
+        Minimize.BackgroundColor3 = theme.ElementColor
+        Minimize.ImageColor3 = theme.TextColor
 
         for _, tab in ipairs(tabsOrder) do
             tab.button.BackgroundColor3 = (tab.button == currentTab) and theme.SchemeColor or theme.ElementColor
@@ -442,11 +443,7 @@ function SimpleKavo.CreateLib(title, themeName)
 
                 local methods = {}
                 function methods:Toggle(value)
-                    if value ~= nil then
-                        State = value
-                    else
-                        State = not State
-                    end
+                    State = value
                     Update()
                     pcall(callback, State)
                 end
@@ -833,7 +830,8 @@ function SimpleKavo.CreateLib(title, themeName)
     end
 
     lib.Minimize = function()
-        toggleMinimize()
+        Minimized = not Minimized
+        Tween(Main, {Size = Minimized and UDim2.new(0,0,0,0) or UDim2.new(0,500,0,350)})
     end
 
     lib.ChangeTheme = updateTheme
