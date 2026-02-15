@@ -459,7 +459,7 @@ function SimpleKavo.CreateLib(title, themeName)
 
             function SectionFunctions:NewDropdown(name, options, defaultOption, callback)
                 local isOpen = false
-                local selectedOption = defaultOption or (options and options[1]) or "Selecione"
+                local selectedOption = defaultOption or (options and options[1]) or ""
 
                 local DropdownFrame = Instance.new("Frame")
                 DropdownFrame.Name = name.."_Dropdown"
@@ -528,7 +528,7 @@ function SimpleKavo.CreateLib(title, themeName)
                         NoOptions.Parent = OptionsFrame
                         NoOptions.BackgroundTransparency = 1
                         NoOptions.Size = UDim2.new(1, 0, 0, 32)
-                        NoOptions.Text = "Sem opções"
+                        NoOptions.Text = ""
                         NoOptions.TextColor3 = currentTheme.TextColor
                         NoOptions.Font = Enum.Font.Gotham
                         NoOptions.TextSize = 12
@@ -668,7 +668,7 @@ function SimpleKavo.CreateLib(title, themeName)
     MainButton.BackgroundTransparency = OPACITY_ELEMENT
     MainButton.Size = UDim2.new(1, 0, 0, 38)
     MainButton.Font = Enum.Font.Gotham
-    MainButton.Text = name..": selecionar"
+    MainButton.Text = name..""
     MainButton.TextColor3 = currentTheme.TextColor
     MainButton.TextSize = 14
     MainButton.TextXAlignment = Enum.TextXAlignment.Left
@@ -713,8 +713,8 @@ function SimpleKavo.CreateLib(title, themeName)
 
     local function updateMainText()
         local count = 0
-        for _ in pairs(selected) do count = count + 1 end
-        MainButton.Text = name .. ": " .. count .. " selecionado(s)"
+        for _ in pairs(selected) do count = count + 0 end
+        MainButton.Text = name .. ": " .. count .. ""
     end
 
     local function createOptions()
