@@ -646,207 +646,218 @@ function SimpleKavo.CreateLib(title, themeName)
             end
 
             function SectionFunctions:NewToggleDropdown(name, options, defaultSelected, callback)
-                local isOpen = false
-                local selected = {}
+    local isOpen = false
+    local selected = {}
+    if defaultSelected and type(defaultSelected) == "table" then
+        for _, opt in ipairs(defaultSelected) do
+            selected[opt] = true
+        end
+    end
 
-                if defaultSelected and type(defaultSelected) == "table" then
-                    for _, opt in ipairs(defaultSelected) do
-                        selected[opt] = true
-                    end
-                end
+    local DropdownFrame = Instance.new("Frame")
+    DropdownFrame.Name = name.."_ToggleDropdown"
+    DropdownFrame.BackgroundTransparency = 1
+    DropdownFrame.Size = UDim2.new(1, 0, 0, 38)
+    DropdownFrame.ClipsDescendants = true
+    DropdownFrame.ZIndex = 6
 
-                local DropdownFrame = Instance.new("Frame")
-                DropdownFrame.Name = name.."_ToggleDropdown"
-                DropdownFrame.BackgroundTransparency = 1
-                DropdownFrame.Size = UDim2.new(1, 0, 0, 38)
-                DropdownFrame.ClipsDescendants = true
-                DropdownFrame.ZIndex = 6
+    local MainButton = Instance.new("TextButton")
+    MainButton.Name = "MainButton"
+    MainButton.Parent = DropdownFrame
+    MainButton.BackgroundColor3 = currentTheme.ElementColor
+    MainButton.BackgroundTransparency = OPACITY_ELEMENT
+    MainButton.Size = UDim2.new(1, 0, 0, 38)
+    MainButton.Font = Enum.Font.Gotham
+    MainButton.Text = name..": selecionar"
+    MainButton.TextColor3 = currentTheme.TextColor
+    MainButton.TextSize = 14
+    MainButton.TextXAlignment = Enum.TextXAlignment.Left
+    MainButton.AutoButtonColor = false
+    MainButton.ZIndex = 7
 
-                local MainButton = Instance.new("TextButton")
-                MainButton.Name = "MainButton"
-                MainButton.Parent = DropdownFrame
-                MainButton.BackgroundColor3 = currentTheme.ElementColor
-                MainButton.BackgroundTransparency = OPACITY_ELEMENT
-                MainButton.Size = UDim2.new(1, 0, 0, 38)
-                MainButton.Font = Enum.Font.Gotham
-                MainButton.Text = name..": selecionar"
-                MainButton.TextColor3 = currentTheme.TextColor
-                MainButton.TextSize = 14
-                MainButton.TextXAlignment = Enum.TextXAlignment.Left
-                MainButton.AutoButtonColor = false
-                MainButton.ZIndex = 7
+    local ButtonCorner = Instance.new("UICorner")
+    ButtonCorner.CornerRadius = UDim.new(0, 6)
+    ButtonCorner.Parent = MainButton
 
-                local ButtonCorner = Instance.new("UICorner")
-                ButtonCorner.CornerRadius = UDim.new(0, 6)
-                ButtonCorner.Parent = MainButton
+    local Arrow = Instance.new("TextLabel")
+    Arrow.Name = "Arrow"
+    Arrow.Parent = MainButton
+    Arrow.BackgroundTransparency = 1
+    Arrow.Size = UDim2.new(0, 22, 0, 22)
+    Arrow.Position = UDim2.new(1, -28, 0, 8)
+    Arrow.Text = "▼"
+    Arrow.TextColor3 = currentTheme.TextColor
+    Arrow.Font = Enum.Font.Gotham
+    Arrow.TextSize = 14
+    Arrow.ZIndex = 7
 
-                local Arrow = Instance.new("TextLabel")
-                Arrow.Name = "Arrow"
-                Arrow.Parent = MainButton
-                Arrow.BackgroundTransparency = 1
-                Arrow.Size = UDim2.new(0, 22, 0, 22)
-                Arrow.Position = UDim2.new(1, -28, 0, 8)
-                Arrow.Text = "▼"
-                Arrow.TextColor3 = currentTheme.TextColor
-                Arrow.Font = Enum.Font.Gotham
-                Arrow.TextSize = 14
-                Arrow.ZIndex = 7
+    local OptionsFrame = Instance.new("Frame")
+    OptionsFrame.Name = "OptionsFrame"
+    OptionsFrame.Parent = DropdownFrame
+    OptionsFrame.BackgroundColor3 = currentTheme.ElementColor
+    OptionsFrame.BackgroundTransparency = OPACITY_ELEMENT
+    OptionsFrame.Position = UDim2.new(0, 0, 0, 44)
+    OptionsFrame.Size = UDim2.new(1, 0, 0, 0)
+    OptionsFrame.Visible = false
+    OptionsFrame.ClipsDescendants = true
+    OptionsFrame.ZIndex = 8
 
-                local OptionsFrame = Instance.new("Frame")
-                OptionsFrame.Name = "OptionsFrame"
-                OptionsFrame.Parent = DropdownFrame
-                OptionsFrame.BackgroundColor3 = currentTheme.ElementColor
-                OptionsFrame.BackgroundTransparency = OPACITY_ELEMENT
-                OptionsFrame.Position = UDim2.new(0, 0, 0, 44)
-                OptionsFrame.Size = UDim2.new(1, 0, 0, 0)
-                OptionsFrame.Visible = false
-                OptionsFrame.ClipsDescendants = true
-                OptionsFrame.ZIndex = 8
+    local OptionsCorner = Instance.new("UICorner")
+    OptionsCorner.CornerRadius = UDim.new(0, 6)
+    OptionsCorner.Parent = OptionsFrame
 
-                local OptionsCorner = Instance.new("UICorner")
-                OptionsCorner.CornerRadius = UDim.new(0, 6)
-                OptionsCorner.Parent = OptionsFrame
+    local OptionsList = Instance.new("UIListLayout")
+    OptionsList.Parent = OptionsFrame
+    OptionsList.Padding = UDim.new(0, 4)
+    OptionsList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-                local OptionsList = Instance.new("UIListLayout")
-                OptionsList.Parent = OptionsFrame
-                OptionsList.Padding = UDim.new(0, 4)
-                OptionsList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    local function updateMainText()
+        local count = 0
+        for _ in pairs(selected) do count = count + 1 end
+        MainButton.Text = name .. ": " .. count .. " selecionado(s)"
+    end
 
-                local function updateMainText()
-                    local count = 0
-                    for _ in pairs(selected) do count = count + 1 end
-                    MainButton.Text = name .. ": " .. count .. " selecionado(s)"
-                end
+    local function createOptions()
+        for _, child in ipairs(OptionsFrame:GetChildren()) do
+            if child:IsA("TextButton") then child:Destroy() end
+        end
 
-                local function createOptions()
-                    for _, child in ipairs(OptionsFrame:GetChildren()) do
-                        if child:IsA("TextButton") then child:Destroy() end
-                    end
+        for _, option in ipairs(options) do
+            local OptionButton = Instance.new("TextButton")
+            OptionButton.Name = tostring(option)
+            OptionButton.Parent = OptionsFrame
+            OptionButton.BackgroundColor3 = currentTheme.ElementColor
+            OptionButton.BackgroundTransparency = OPACITY_ELEMENT
+            OptionButton.Size = UDim2.new(1, -16, 0, 32)
+            OptionButton.Font = Enum.Font.Gotham
+            OptionButton.Text = "  " .. tostring(option)   -- pequeno espaço pra alinhar com o ✓
+            OptionButton.TextColor3 = currentTheme.TextColor
+            OptionButton.TextSize = 14
+            OptionButton.AutoButtonColor = false
+            OptionButton.ZIndex = 9
+            OptionButton.TextXAlignment = Enum.TextXAlignment.Left
 
-                    for _, option in ipairs(options) do
-                        local OptionButton = Instance.new("TextButton")
-                        OptionButton.Name = tostring(option)
-                        OptionButton.Parent = OptionsFrame
-                        OptionButton.BackgroundColor3 = currentTheme.ElementColor
-                        OptionButton.BackgroundTransparency = OPACITY_ELEMENT
-                        OptionButton.Size = UDim2.new(1, -16, 0, 32)
-                        OptionButton.Font = Enum.Font.Gotham
-                        OptionButton.Text = tostring(option)
-                        OptionButton.TextColor3 = currentTheme.TextColor
-                        OptionButton.TextSize = 14
-                        OptionButton.AutoButtonColor = false
-                        OptionButton.ZIndex = 9
+            local OptionCorner = Instance.new("UICorner")
+            OptionCorner.CornerRadius = UDim.new(0, 6)
+            OptionCorner.Parent = OptionButton
 
-                        local OptionCorner = Instance.new("UICorner")
-                        OptionCorner.CornerRadius = UDim.new(0, 6)
-                        OptionCorner.Parent = OptionButton
+            -- Checkmark (✓)
+            local CheckMark = Instance.new("TextLabel")
+            CheckMark.Name = "CheckMark"
+            CheckMark.Parent = OptionButton
+            CheckMark.BackgroundTransparency = 1
+            CheckMark.Size = UDim2.new(0, 20, 0, 20)
+            CheckMark.Position = UDim2.new(1, -26, 0.5, -10)
+            CheckMark.Font = Enum.Font.GothamBold
+            CheckMark.Text = selected[option] and "✓" or ""
+            CheckMark.TextColor3 = Color3.fromRGB(255,255,255)
+            CheckMark.TextSize = 16
+            CheckMark.ZIndex = 10
 
-                        if selected[option] then
-                            OptionButton.BackgroundColor3 = currentTheme.SchemeColor
-                            OptionButton.BackgroundTransparency = 0.45
-                        end
-
-                        OptionButton.MouseButton1Click:Connect(function()
-                            selected[option] = not selected[option]
-                            if selected[option] then
-                                Tween(OptionButton, {BackgroundColor3 = currentTheme.SchemeColor, BackgroundTransparency = 0.45}, 0.15)
-                            else
-                                Tween(OptionButton, {BackgroundColor3 = currentTheme.ElementColor, BackgroundTransparency = OPACITY_ELEMENT}, 0.15)
-                            end
-                            updateMainText()
-                            if callback then callback(option, selected[option]) end
-                        end)
-
-                        OptionButton.MouseEnter:Connect(function()
-                            if not selected[option] then
-                                Tween(OptionButton, {BackgroundTransparency = OPACITY_ELEMENT - 0.25}, 0.12)
-                            end
-                        end)
-
-                        OptionButton.MouseLeave:Connect(function()
-                            if not selected[option] then
-                                Tween(OptionButton, {BackgroundTransparency = OPACITY_ELEMENT}, 0.12)
-                            end
-                        end)
-
-                        local check = Instance.new("TextLabel")
-                        check.Parent = OptionButton
-                        check.BackgroundTransparency = 1
-                        check.Size = UDim2.new(0, 20, 0, 20)
-                        check.Position = UDim2.new(1, -26, 0.5, -10)
-                        check.Font = Enum.Font.GothamBold
-                        check.Text = selected[option] and "✓" or ""
-                        check.TextColor3 = Color3.fromRGB(255,255,255)
-                        check.TextSize = 16
-                        check.ZIndex = 10
-
-                        OptionButton.MouseButton1Click:Connect(function()
-                            check.Text = selected[option] and "✓" or ""
-                        end)
-                    end
-                end
-
-                createOptions()
-                updateMainText()
-
-                local function toggleDropdown()
-                    isOpen = not isOpen
-                    Tween(Arrow, {Rotation = isOpen and 180 or 0}, 0.2)
-                    if isOpen then
-                        local count = math.max(#options, 1)
-                        local height = count * 36 + (count - 1) * 4 + 12
-                        OptionsFrame.Visible = true
-                        Tween(DropdownFrame, {Size = UDim2.new(1, 0, 0, 38 + height)}, 0.2)
-                        Tween(OptionsFrame, {Size = UDim2.new(1, 0, 0, height)}, 0.2)
-                    else
-                        Tween(DropdownFrame, {Size = UDim2.new(1, 0, 0, 38)}, 0.2)
-                        Tween(OptionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.2)
-                        task.wait(0.25)
-                        OptionsFrame.Visible = false
-                    end
-                end
-
-                MainButton.MouseButton1Click:Connect(toggleDropdown)
-
-                local closeConnection = UserInputService.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 and isOpen then
-                        local pos = input.Position
-                        local fpos = DropdownFrame.AbsolutePosition
-                        local fsize = DropdownFrame.AbsoluteSize
-                        if not (pos.X >= fpos.X and pos.X <= fpos.X + fsize.X and pos.Y >= fpos.Y and pos.Y <= fpos.Y + fsize.Y) then
-                            toggleDropdown()
-                        end
-                    end
-                end)
-
-                DropdownFrame.Destroying:Connect(function()
-                    closeConnection:Disconnect()
-                end)
-
-                local methods = {}
-                function methods:GetSelected()
-                    local list = {}
-                    for k, v in pairs(selected) do
-                        if v then table.insert(list, k) end
-                    end
-                    return list
-                end
-
-                function methods:SetSelected(tbl)
-                    selected = {}
-                    if type(tbl) == "table" then
-                        for _, v in ipairs(tbl) do
-                            selected[v] = true
-                        end
-                    end
-                    createOptions()
-                    updateMainText()
-                end
-
-                DropdownFrame.Parent = SectionContent
-                return methods
+            -- Cor inicial correta
+            if selected[option] then
+                OptionButton.BackgroundColor3 = currentTheme.SchemeColor
+                OptionButton.BackgroundTransparency = 0.45
             end
 
+            OptionButton.MouseButton1Click:Connect(function()
+                selected[option] = not selected[option]
+
+                if selected[option] then
+                    Tween(OptionButton, {
+                        BackgroundColor3 = currentTheme.SchemeColor,
+                        BackgroundTransparency = 0.45
+                    }, 0.15)
+                    CheckMark.Text = "✓"
+                else
+                    Tween(OptionButton, {
+                        BackgroundColor3 = currentTheme.ElementColor,
+                        BackgroundTransparency = OPACITY_ELEMENT
+                    }, 0.15)
+                    CheckMark.Text = ""
+                end
+
+                updateMainText()
+                if callback then callback(option, selected[option]) end
+            end)
+
+            OptionButton.MouseEnter:Connect(function()
+                if not selected[option] then
+                    Tween(OptionButton, {BackgroundTransparency = OPACITY_ELEMENT - 0.25}, 0.12)
+                end
+            end)
+
+            OptionButton.MouseLeave:Connect(function()
+                if not selected[option] then
+                    Tween(OptionButton, {BackgroundTransparency = OPACITY_ELEMENT}, 0.12)
+                end
+            end)
+        end
+    end
+
+    createOptions()
+    updateMainText()
+
+    local function toggleDropdown()
+        isOpen = not isOpen
+        Tween(Arrow, {Rotation = isOpen and 180 or 0}, 0.2)
+
+        if isOpen then
+            local count = math.max(#options, 1)
+            local height = count * 36 + (count - 1) * 4 + 12
+            OptionsFrame.Visible = true
+            Tween(DropdownFrame, {Size = UDim2.new(1, 0, 0, 38 + height)}, 0.2)
+            Tween(OptionsFrame, {Size = UDim2.new(1, 0, 0, height)}, 0.2)
+        else
+            Tween(DropdownFrame, {Size = UDim2.new(1, 0, 0, 38)}, 0.2)
+            Tween(OptionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.2)
+            task.wait(0.25)
+            OptionsFrame.Visible = false
+        end
+    end
+
+    MainButton.MouseButton1Click:Connect(toggleDropdown)
+
+    local closeConnection = UserInputService.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and isOpen then
+            local pos = input.Position
+            local fpos = DropdownFrame.AbsolutePosition
+            local fsize = DropdownFrame.AbsoluteSize
+            if not (pos.X >= fpos.X and pos.X <= fpos.X + fsize.X and
+                    pos.Y >= fpos.Y and pos.Y <= fpos.Y + fsize.Y) then
+                toggleDropdown()
+            end
+        end
+    end)
+
+    DropdownFrame.Destroying:Connect(function()
+        closeConnection:Disconnect()
+    end)
+
+    local methods = {}
+
+    function methods:GetSelected()
+        local list = {}
+        for k, v in pairs(selected) do
+            if v then table.insert(list, k) end
+        end
+        return list
+    end
+
+    function methods:SetSelected(tbl)
+        selected = {}
+        if type(tbl) == "table" then
+            for _, v in ipairs(tbl) do
+                selected[v] = true
+            end
+        end
+        createOptions()
+        updateMainText()
+    end
+
+    DropdownFrame.Parent = SectionContent
+    return methods
+end
             function SectionFunctions:NewTextBox(name, placeholder, callback)
                 local TextBoxFrame = Instance.new("Frame")
                 TextBoxFrame.Name = name .. "_TextBox"
